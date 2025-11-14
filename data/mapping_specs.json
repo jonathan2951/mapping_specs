@@ -1,0 +1,74 @@
+{
+  "_id": "ontology_sport_bags_v1.bag_sku",
+  "target": {
+    "release": "ontology_sport_bags_v1",
+    "table": "bag_sku",
+    "grain": ["SKUId"],
+    "partition_by": ["BagFamilyId"],
+    "write_mode": "merge"
+  },
+  "sources": [
+    { "alias": "ic", "catalog": "group_iii", "schema": "silver", "table": "initemclass" },
+    { "alias": "ii", "catalog": "group_iii", "schema": "silver", "table": "inventoryitem" }
+  ],
+  "joins": [
+    { "type": "left", "on": ["ii.ItemClassID = ic.ItemClassID"] }
+  ],
+  "filters": [
+    "ii.InventoryID IS NOT NULL"
+  ],
+  "columns": [
+    {
+      "target_column": "BagFamilyId",
+      "expression_sql": "ic.ItemClassID",
+      "dtype": "INT",
+      "lineage": [{ "alias": "ic", "column": "ItemClassID" }],
+      "expectations": { "not_null": true }
+    },
+    {
+      "target_column": "BagFamilyName",
+      "expression_sql": "ic.Descr",
+      "dtype": "STRING",
+      "lineage": [{ "alias": "ic", "column": "Descr" }]
+    },
+    {
+      "target_column": "SKUId",
+      "expression_sql": "ii.InventoryID",
+      "dtype": "INT",
+      "lineage": [{ "alias": "ii", "column": "InventoryID" }],
+      "expectations": { "not_null": true }
+    },
+    {
+      "target_column": "SKUCode",
+      "expression_sql": "ii.InventoryCD",
+      "dtype": "STRING",
+      "lineage": [{ "alias": "ii", "column": "InventoryCD" }]
+    },
+    {
+      "target_column": "Description",
+      "expression_sql": "ii.Descr",
+      "dtype": "STRING",
+      "lineage": [{ "alias": "ii", "column": "Descr" }]
+    },
+    {
+      "target_column": "ListPrice",
+      "expression_sql": "ii.BasePrice",
+      "dtype": "DECIMAL(18,2)",
+      "lineage": [{ "alias": "ii", "column": "BasePrice" }]
+    }
+  ],
+  "constraints": {
+    "unique_keys": [["SKUId"]],
+    "fk_checks": [
+      { "column": "BagFamilyId", "ref": "ontology_sport_bags_v1.bag_family(BagFamilyId)" }
+    ]
+  },
+  "meta": {
+    "status": "proposed",
+    "generator": "Mapping_Engine v1.2",
+    "scores": { "table_alignment": 0.85, "avg_column_confidence": 0.80 },
+    "created_at": "2025-10-21T10:15:00Z",
+    "version": { "release": "v1", "revision": 1, "sha": "" },
+    "prompt": { "langflow_id": "", "ts": "" }
+  }
+}
